@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Frontend - Vue.js application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: read-flow-frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - read-flow-network
+
+  # Backend - Java Spring Boot application (placeholder)
+  # Replace with your actual backend configuration
+  backend:
+    image: your-backend-image:latest
+    container_name: read-flow-backend
+    ports:
+      - '8081:8081'
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DATABASE_URL=jdbc:mysql://mysql:3306/read_flow
+      - DATABASE_USERNAME=root
+      - DATABASE_PASSWORD=your_password
+      # Azure TTS configuration
+      - AZURE_SPEECH_KEY=your_azure_speech_key
+      - AZURE_SPEECH_REGION=eastasia
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    networks:
+      - read-flow-network
+    volumes:
+      - audio-storage:/app/audio
+
+  # MySQL database
+  mysql:
+    image: mysql:8.0
+    container_name: read-flow-mysql
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=your_password
+      - MYSQL_DATABASE=read_flow
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - read-flow-network
+
+networks:
+  read-flow-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  audio-storage:
